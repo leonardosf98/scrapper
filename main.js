@@ -11,12 +11,28 @@ const puppeteer = require("puppeteer");
   await page.waitForSelector(".poly-card");
 
   const produtos = await page.evaluate(() => {
+    function formatarPreco(stringToFormat) {
+      if (!stringToFormat) return "Preço não encontrado";
+
+      stringToFormat = stringToFormat.split("\n").join("");
+
+      const regex = /R\$\d+,\d{2}/g;
+      const priceList = stringToFormat.match(regex);
+
+      if (!priceList || priceList.length < 2) {
+        return "Formato de preço inesperado";
+      }
+
+      let parcels = stringToFormat.replace(regex, "");
+
+      return `${priceList[0]}\n${priceList[1]}\n${parcels.trim()}`;
+    }
     return Array.from(document.querySelectorAll(".poly-card")).map(
       (produto) => {
         const nome = produto.querySelector(".poly-component__title").innerText;
         let preco = produto.querySelector(".poly-component__price").innerText;
         const link = produto.querySelector("a").href;
-        preco = preco.split("\n").join("");
+        preco = formatarPreco(preco);
 
         return { nome, preco, link };
       }
