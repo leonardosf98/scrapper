@@ -4,35 +4,22 @@ const puppeteer = require("puppeteer");
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
 
-  await page.goto("https://www.mercadolivre.com.br/", {
+  await page.goto("https://www.mercadolivre.com.br/ofertas", {
     waitUntil: "networkidle0",
   });
 
-  await page.waitForSelector(".poly-card");
+  await page.waitForSelector(".promotion-item");
 
   const produtos = await page.evaluate(() => {
-    function formatarPreco(stringToFormat) {
-      if (!stringToFormat) return "Preço não encontrado";
-
-      stringToFormat = stringToFormat.split("\n").join("");
-
-      const regex = /R\$\d+,\d{2}/g;
-      const priceList = stringToFormat.match(regex);
-
-      if (!priceList || priceList.length < 2) {
-        return "Formato de preço inesperado";
-      }
-
-      let parcels = stringToFormat.replace(regex, "");
-
-      return `${priceList[0]}\n${priceList[1]}\n${parcels.trim()}`;
-    }
-    return Array.from(document.querySelectorAll(".poly-card")).map(
+    return Array.from(document.querySelectorAll(".promotion-item")).map(
       (produto) => {
-        const nome = produto.querySelector(".poly-component__title").innerText;
-        let preco = produto.querySelector(".poly-component__price").innerText;
-        const link = produto.querySelector("a").href;
-        preco = formatarPreco(preco);
+        const nome = produto.querySelector(".promotion-item__title").innerText;
+        let preco = `R$${
+          produto.querySelector(".andes-money-amount__fraction").innerText
+        }`;
+        const link = produto.querySelector(
+          ".promotion-item__link-container"
+        ).href;
 
         return { nome, preco, link };
       }
@@ -43,6 +30,7 @@ const puppeteer = require("puppeteer");
     console.log(item.nome);
     console.log(item.preco);
     console.log(item.link);
+    console.log("\n");
   });
 
   await browser.close();
