@@ -8,18 +8,16 @@ const puppeteer = require("puppeteer");
     waitUntil: "networkidle0",
   });
 
-  await page.waitForSelector(".promotion-item");
+  await page.waitForSelector(".poly-card__content");
 
   const produtos = await page.evaluate(() => {
-    return Array.from(document.querySelectorAll(".promotion-item")).map(
+    return Array.from(document.querySelectorAll(".poly-card__content")).map(
       (produto) => {
-        const nome = produto.querySelector(".promotion-item__title").innerText;
+        const nome = produto.querySelector(".poly-component__title").innerText;
         let preco = `R$${
           produto.querySelector(".andes-money-amount__fraction").innerText
         }`;
-        const link = produto.querySelector(
-          ".promotion-item__link-container"
-        ).href;
+        const link = produto.querySelector(".poly-component__title").href;
 
         return { nome, preco, link };
       }
